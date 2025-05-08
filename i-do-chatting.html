@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Socket Chat</title>
   <script src="/socket.io/socket.io.js"></script>
   <style>
-    /* Styling skipped for brevity, same Discord-like styles as before */
     body { margin: 0; font-family: sans-serif; background-color: #36393f; color: #fff; }
     #login, #chat { display: none; }
     #login.active, #chat.active { display: flex; }
@@ -63,9 +63,10 @@
 </div>
 
 <script>
-  const socket = io("https://YOUR_RENDER_URL.onrender.com"); // Replace with your Render URL
+  const socket = io(https://i-do-chatting.onrender.com); // Connect to the server
   let username = "";
 
+  // Handle user login
   function joinChat() {
     const input = document.getElementById("usernameInput");
     username = input.value.trim();
@@ -75,6 +76,7 @@
     }
   }
 
+  // Send a message
   function sendMessage() {
     const input = document.getElementById("messageInput");
     const message = input.value.trim();
@@ -84,28 +86,30 @@
     }
   }
 
+  // Format and display message (with support for links and images)
   function formatMessage({ username, message }) {
     const div = document.createElement("div");
     div.classList.add("message");
 
-    // Linkify URLs
+    // Find and replace URLs with anchor tags or images
     const urlRegex = /(https?:\/\/[^\s]+)/g;
-    let formatted = message.replace(urlRegex, (url) => {
+    let formattedMessage = message.replace(urlRegex, (url) => {
       if (/\.(jpeg|jpg|gif|png|webp)$/i.test(url)) {
-        return `<img src="${url}" alt="image" />`;
+        return `<img src="${url}" alt="image" />`; // Display image if URL points to an image
       }
-      return `<a href="${url}" target="_blank">${url}</a>`;
+      return `<a href="${url}" target="_blank">${url}</a>`; // Otherwise, create a link
     });
 
-    div.innerHTML = `<strong style="color:#7289da">${username}:</strong> ${formatted}`;
+    div.innerHTML = `<strong style="color:#7289da">${username}:</strong> ${formattedMessage}`;
     return div;
   }
 
+  // Listen for incoming messages
   socket.on("chat message", (data) => {
     const messages = document.getElementById("chatMessages");
     const msgElement = formatMessage(data);
     messages.appendChild(msgElement);
-    messages.scrollTop = messages.scrollHeight;
+    messages.scrollTop = messages.scrollHeight; // Auto-scroll to the latest message
   });
 </script>
 </body>
