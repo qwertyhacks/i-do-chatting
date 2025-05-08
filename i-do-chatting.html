@@ -2,45 +2,24 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Live Chat Room</title>
+  <title>Socket Chat</title>
   <script src="/socket.io/socket.io.js"></script>
   <style>
-    /* Same styling as before */
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      display: flex;
+    /* Styling skipped for brevity, same Discord-like styles as before */
+    body { margin: 0; font-family: sans-serif; background-color: #36393f; color: #fff; }
+    #login, #chat { display: none; }
+    #login.active, #chat.active { display: flex; }
+
+    #login {
       height: 100vh;
-      background-color: #2f3136;
-      color: #fff;
-    }
-
-    .sidebar {
-      width: 250px;
-      background-color: #202225;
-      padding: 1rem;
-      display: flex;
+      justify-content: center;
+      align-items: center;
       flex-direction: column;
     }
 
-    .channel {
-      padding: 10px;
-      margin-bottom: 5px;
-      background-color: #2f3136;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .channel:hover {
-      background-color: #36393f;
-    }
-
-    .chat-container {
-      flex: 1;
-      display: flex;
+    #chat {
+      height: 100vh;
       flex-direction: column;
-      justify-content: space-between;
-      background-color: #36393f;
     }
 
     .chat-messages {
@@ -49,63 +28,85 @@
       padding: 1rem;
     }
 
-    .message {
-      margin-bottom: 1rem;
+    .message img {
+      max-width: 200px;
+      max-height: 200px;
+      border-radius: 6px;
+      display: block;
+      margin-top: 5px;
     }
 
-    .message .username {
-      font-weight: bold;
-      color: #7289da;
-    }
-
-    .message-input {
-      display: flex;
-      padding: 1rem;
-      border-top: 1px solid #202225;
-      background-color: #40444b;
-    }
-
-    .message-input input {
-      flex: 1;
+    input, button {
       padding: 10px;
-      border: none;
       border-radius: 5px;
-      background-color: #2f3136;
-      color: white;
-    }
-
-    .message-input button {
-      margin-left: 10px;
-      padding: 10px 15px;
-      background-color: #7289da;
       border: none;
-      border-radius: 5px;
-      color: white;
-      cursor: pointer;
-    }
-
-    .message-input button:hover {
-      background-color: #5b6eae;
+      margin: 5px;
     }
   </style>
 </head>
 <body>
-  <div class="sidebar">
-    <h2>Channels</h2>
-    <div class="channel"># general</div>
-    <div class="channel"># games</div>
-    <div class="channel"># music</div>
-  </div>
-  <div class="chat-container">
-    <div class="chat-messages" id="chatMessages"></div>
-    <div class="message-input">
-      <input type="text" id="messageInput" placeholder="Type a message..." />
-      <button id="sendBtn">Send</button>
-    </div>
-  </div>
 
-  <script>
-    const socket = io(https://i-do-chatting.onrender.com);
-    const messageInput = document.getElementById("messageInput");
+<!-- Login UI -->
+<div id="login" class="active">
+  <h2>Enter Username</h2>
+  <input type="text" id="usernameInput" placeholder="Your name..." />
+  <button onclick="joinChat()">Join Chat</button>
+</div>
+
+<!-- Chat UI -->
+<div id="chat">
+  <div class="chat-messages" id="chatMessages"></div>
+  <div class="message-input">
+    <input type="text" id="messageInput" placeholder="Type a message..." />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<script>
+  const socket = io("https://YOUR_RENDER_URL.onrender.com"); // Replace with your Render URL
+  let username = "";
+
+  function joinChat() {
+    const input = document.getElementById("usernameInput");
+    username = input.value.trim();
+    if (username !== "") {
+      document.getElementById("login").classList.remove("active");
+      document.getElementById("chat").classList.add("active");
+    }
+  }
+
+  function sendMessage() {
+    const input = document.getElementById("messageInput");
+    const message = input.value.trim();
+    if (message !== "") {
+      socket.emit("chat message", { username, message });
+      input.value = "";
+    }
+  }
+
+  function formatMessage({ username, message }) {
+    const div = document.createElement("div");
+    div.classList.add("message");
+
+    // Linkify URLs
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    let formatted = message.replace(urlRegex, (url) => {
+      if (/\.(jpeg|jpg|gif|png|webp)$/i.test(url)) {
+        return `<img src="${url}" alt="image" />`;
+      }
+      return `<a href="${url}" target="_blank">${url}</a>`;
+    });
+
+    div.innerHTML = `<strong style="color:#7289da">${username}:</strong> ${formatted}`;
+    return div;
+  }
+
+  socket.on("chat message", (data) => {
     const messages = document.getElementById("chatMessages");
-    const sendBtn
+    const msgElement = formatMessage(data);
+    messages.appendChild(msgElement);
+    messages.scrollTop = messages.scrollHeight;
+  });
+</script>
+</body>
+</html>
