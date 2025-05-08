@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Chat Room</title>
+  <title>Live Chat Room</title>
+  <script src="/socket.io/socket.io.js"></script>
   <style>
+    /* Same styling as before */
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
@@ -18,7 +19,6 @@
       width: 250px;
       background-color: #202225;
       padding: 1rem;
-      box-sizing: border-box;
       display: flex;
       flex-direction: column;
     }
@@ -97,32 +97,15 @@
     <div class="channel"># music</div>
   </div>
   <div class="chat-container">
-    <div class="chat-messages" id="chatMessages">
-      <div class="message">
-        <div class="username">Alice</div>
-        <div>Hello everyone!</div>
-      </div>
-    </div>
+    <div class="chat-messages" id="chatMessages"></div>
     <div class="message-input">
       <input type="text" id="messageInput" placeholder="Type a message..." />
-      <button onclick="sendMessage()">Send</button>
+      <button id="sendBtn">Send</button>
     </div>
   </div>
 
   <script>
-    function sendMessage() {
-      const input = document.getElementById("messageInput");
-      const message = input.value.trim();
-      if (message !== "") {
-        const messagesContainer = document.getElementById("chatMessages");
-        const messageDiv = document.createElement("div");
-        messageDiv.classList.add("message");
-        messageDiv.innerHTML = `<div class="username">You</div><div>${message}</div>`;
-        messagesContainer.appendChild(messageDiv);
-        input.value = "";
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-      }
-    }
-  </script>
-</body>
-</html>
+    const socket = io();
+    const messageInput = document.getElementById("messageInput");
+    const messages = document.getElementById("chatMessages");
+    const sendBtn
