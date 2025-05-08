@@ -50,7 +50,7 @@
 <div id="login" class="active">
   <h2>Enter Username</h2>
   <input type="text" id="usernameInput" placeholder="Your name..." />
-  <button onclick="joinChat()">Join Chat</button>
+  <button id="joinBtn">Join Chat</button>
 </div>
 
 <!-- Chat UI -->
@@ -78,6 +78,7 @@
     }
 
     // Emit the username and transition to the chat screen
+    console.log("Joining chat as: " + username); // Debugging log
     socket.emit("chat message", { username: "System", message: `${username} has joined the chat.` });
     document.getElementById("login").classList.remove("active");
     document.getElementById("chat").classList.add("active");
@@ -118,6 +119,9 @@
     messages.appendChild(msgElement);
     messages.scrollTop = messages.scrollHeight; // Auto-scroll to the latest message
   });
+
+  // Attach the click event listener to the "Join Chat" button
+  document.getElementById("joinBtn").addEventListener("click", joinChat);
 </script>
 </body>
 </html>
