@@ -4,21 +4,27 @@ const { Server } = require("socket.io");
 const cors = require("cors");
 
 const app = express();
-app.use(cors()); // Allow CORS for frontend
-
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*", // or restrict to your GitHub Pages domain
+    origin: "*", // You can restrict this to your frontend URL for security
     methods: ["GET", "POST"]
   }
 });
 
+app.use(cors());
+app.use(express.static("public")); // Serve index.html and frontend from /public
+
+// Socket.IO logic
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
-  socket.on("chat message", (msg) => {
-    io.emit("chat message", msg);
+  socket.on("chat message", (data) => {
+    // Broadcast message to all clients
+    io.emit("chat message", {
+      username: data.username,
+      message: data.message
+    });
   });
 
   socket.on("disconnect", () => {
@@ -26,7 +32,8 @@ io.on("connection", (socket) => {
   });
 });
 
+// Start server
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
