@@ -66,14 +66,21 @@
   const socket = io(https://i-do-chatting.onrender.com); // Connect to the server
   let username = "";
 
-  // Handle user login
+  // Handle user login and transition to chat
   function joinChat() {
     const input = document.getElementById("usernameInput");
     username = input.value.trim();
-    if (username !== "") {
-      document.getElementById("login").classList.remove("active");
-      document.getElementById("chat").classList.add("active");
+    
+    // Ensure username is entered
+    if (username === "") {
+      alert("Please enter a username!");
+      return;
     }
+
+    // Emit the username and transition to the chat screen
+    socket.emit("chat message", { username: "System", message: `${username} has joined the chat.` });
+    document.getElementById("login").classList.remove("active");
+    document.getElementById("chat").classList.add("active");
   }
 
   // Send a message
